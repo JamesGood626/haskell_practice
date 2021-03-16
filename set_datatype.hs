@@ -108,23 +108,55 @@ main.hs:97:44: error:
    |
 97 | elements (Branch lb x rb) = (elements lb):[x, (elements rb)]
 
+Example Usage:
+s = insert 60 $ insert 40 $ insert 50 $ insert 300 $ insert 200 $ insert 100 empty
+s
+=> ((40-50-60)-100-("Leaf"-200-300))
+elements s
+=> [40,50,60,100,200,300]
 -}
--- elements :: Set a -> [a]
--- elements Leaf = []
--- elements (Branch Leaf x rb) = x:(elements rb)
--- elements (Branch lb x Leaf) = x:(elements lb)
--- elements (Branch lb x rb) = x:(elements lb):(elements rb)
+elements :: Set a -> [a]
+elements Leaf = []
+elements (Branch Leaf x rb) = x:(elements rb)
+elements (Branch lb x Leaf) = x:(elements lb)
+elements (Branch lb x rb) = (elements lb) ++ [x] ++ (elements rb)
+
+
 
 -- Not quite sure what the merge behavior should be like.
 -- Use the elements function and merge the two lists of the Sets
 -- followed by sorting them from greatest to least and then insert
 -- all of them into a Set?
-merge :: Ord a => Set a -> Set a -> Set a
--- merge x y =
+-- 1. call elements on one of the sets
+-- 2. reduce over the lists returned by elements, calling insert into the other set
+--    for each list item.
+{-
+  Implemented it on the first try, Let's Go!!!!!
+  Exmaple Usage:
 
+  s = insert 60 $ insert 40 $ insert 50 $ insert 300 $ insert 200 $ insert 100 empty
+  s
+  => ((40-50-60)-100-("Leaf"-200-300))
+  s2 = insert 5000 $ insert 4000 $ insert 2000 empty
+  s2
+  => ("Leaf"-2000-("Leaf"-4000-5000))
+  merge s s2
+  => ((((((40-50-"Leaf")-60-"Leaf")-100-"Leaf")-200-"Leaf")-300-"Leaf")-2000-("Leaf"-4000-5000))
+-}
+merge :: Ord a => Set a -> Set a -> Set a
+merge x y = foldr insert y xs
+  where xs = elements x
 
 -- Was curious if this was possible... It's Not
 -- combine :: Integer -> (Bool | Integer)
 -- combine x = if x === 0 then True else 100
 
 main = pure ()
+
+-- For later reference:
+-- https://hackage.haskell.org/package/base-4.14.1.0/docs/Data-Foldable.html
+-- data Tree a = Empty | Leaf a | Node (Tree a) a (Tree a)
+-- instance Foldable Tree where
+--   foldr f z Empty = z
+--   foldr f z (Leaf x) = f x z
+--   foldr f z (Node l k r) = foldr f (f k (foldr f z r)) l

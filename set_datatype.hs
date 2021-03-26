@@ -65,10 +65,6 @@ singleton x = Branch Leaf x Leaf
 -}
 insert :: Ord a => a -> Set a -> Set a
 insert n Leaf = Branch Leaf n Leaf
-insert n (Branch Leaf x Leaf) =
-  case n < x of
-    True -> (Branch (Branch Leaf n Leaf) x Leaf)
-    False -> (Branch Leaf x (Branch Leaf n Leaf))
 insert n (Branch lb x rb) =
   case n < x of
     True -> (Branch (insert n lb) x rb)
@@ -117,8 +113,6 @@ elements s
 -}
 elements :: Set a -> [a]
 elements Leaf = []
-elements (Branch Leaf x rb) = x:(elements rb)
-elements (Branch lb x Leaf) = x:(elements lb)
 elements (Branch lb x rb) = (elements lb) ++ [x] ++ (elements rb)
 
 
